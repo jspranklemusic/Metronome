@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+<!-- JS, Popper.js, and jQuery -->
+<link href="https://fonts.googleapis.com/css2?family=Capriola&family=Righteous&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet"> 
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.60/Tone.js" integrity="sha512-+luS5BFaFcKtV15UoNKA+FYZS9K4PkkE4yK2mO/g+99/24OJikgxvEhGRQs7YOPNpPw7hBxv1aQfS1CZryD3qQ==" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome</title>
+    <style>
+        body{
+            overflow: hidden;
+            width:100vw;
+            height:100vw;
+            
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+                                  
+        }
+        @media screen and (max-height: 600px) {
+           #tempo-display{
+               transform: scale(0.7);
+           }
+        }
+        .fontsize40{
+            font-size: 70px;
+        }
+        @keyframes fadein{
+            0%{opacity:0}
+            100%{opacity:1}
+        }
+        @keyframes pulse-red {
+            0%{background:skyblue}
+            1%{background:red}
+            100%{background:skyblue}
+        }
+
+        .pulse-red{
+            animation: pulse-red 0.15s;
+            animation-fill-mode: forwards;
+        }
+        .pulse-red2{
+            animation: pulse-red 0.15s;
+            animation-fill-mode: forwards;
+        }
+
+        .tempo-container{
+          padding-bottom: 20px;
+          padding-top: 20px;
+          
+        }
+        .tempo-text{
+            padding-bottom: 10px;
+            
+        }
+        .tempo-inner{
+            
+            border-radius:50%;
+            height:250px;
+            width:250px;
+            margin:auto;
+            display:grid;
+            align-content: center;
+            background: linear-gradient(183deg, rgba(255,255,255,1) 35%, rgba(228,228,228,1) 100%);
+        }
+        .rotate{
+            transform: rotate(-90deg);
+         
+            
+        }
+
+        #play{
+            transition:0.1s;
+            width:50%;
+           
+            text-align: center;
+        }
+        #play:active{
+            background:maroon;
+        }
+        #pause:active{
+            background:maroon;
+            transition:0.1s;
+        }
+        #pause{
+            width:50%;
+            text-align: center;
+            transition:0.1s;
+           
+        }
+        .tempo-display{
+            height:50vh;
+            font-size:8em;
+            display:grid;
+            align-content: flex-end;
+            justify-content: center;
+        }
+        .circle2{
+            border-radius:50%;
+            background:skyblue;
+            height:280px;
+            width:280px;
+            display:grid;
+            align-content: center;
+            box-shadow: 0px 2px 10px black;
+            animation: fadein 2s;
+            
+        }
+        .googleFont{
+            font-family: 'Capriola', sans-serif;
+            padding-top:5px;
+            border-radius:25px;
+            margin-top:10px;
+            border-bottom:8px solid skyblue;
+            animation: fadein 2s;
+            
+        }
+    </style>
+</head>
+<body>
+
+    <div id="transport" class="row justify-content-around  bg-danger text-light fontsize40">
+        
+        <span style="padding-bottom:10px;" id="play"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-play" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+          </svg></span>
+        <span id="pause"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pause" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+          </svg></span>
+  
+    </div>
+
+    <div class="container-fluid w-55">
+    <h2 class="text-center bg-primary text-light googleFont">BPM Tools</h2> 
+    </div>
+
+    
+
+<div id="tempo-display" class="container-fluid  tempo-display  text-center">
+    <div class="circle2">
+    <div class="tempo-inner bg-light text-primary">
+        <div class="tempo-text" id="time"></div>
+    </div>
+
+</div>
+</div>
+
+<div class="container-fluid fixed-bottom bg-danger tempo-container">
+    <div class="row">
+     
+            <label class="mt-3" for="tempo-slider"></label>
+            <input type="range" class="custom-range " min="30" max="250" step="1" value="100" id="tempo-slider">
+        </div>
+     
+    </div>
+    
+<div id="tap-tempo" style="display:none;">Tap Tempo: <span id="bpm"></span></div>
+
+    <script>
+var metPlay=false;
+var timeInMilliSecs=[]
+var averageTime=[]
+var metronome 
+var player = new Tone.Player('metronome.wav').toMaster();
+var time = document.getElementById("tempo-slider").value
+document.getElementById("time").innerHTML=time
+let audio = new Audio('woodblock.wav')
+
+//Tap Tempo
+document.querySelector(".tempo-inner").addEventListener('click',()=>{
+
+let d = new Date();
+let diff=0
+var timeOutMet
+timeInMilliSecs.unshift(d.getTime())
+if(timeInMilliSecs.length>1){
+    
+    diff=Math.abs(timeInMilliSecs[1]-timeInMilliSecs[0])/1000
+    averageTime.unshift(Math.round(60/diff))
+    let bpm = averageTime.reduce((a,b)=>a+b,0)
+    bpm = Math.round(bpm/averageTime.length)
+    if (averageTime.length>3){averageTime.pop()}
+    if(bpm>250){bpm=250}
+    document.getElementById("bpm").innerHTML=bpm
+    time=bpm
+    document.getElementById("tempo-slider").value=bpm
+    document.getElementById("time").innerHTML=time
+    
+    
+}
+if(timeInMilliSecs.length>5){timeInMilliSecs.pop()}
+
+})
+
+//Tempo Slider
+document.getElementById("tempo-slider").addEventListener('input',()=>{
+    time = document.getElementById("tempo-slider").value
+document.getElementById("time").innerHTML=time
+})
+
+document.getElementById("pause").addEventListener('click',()=>{
+    clearTimeout(metronome)
+    
+})
+
+
+    $("#play").on('click',()=>{
+        $(".circle2").css({"opacity":"0.5"})
+            setTimeout(()=>{
+            $(".circle2").css({"opacity":"1"})
+            },25)
+            
+    
+       
+        clearTimeout(metronome)
+        audio.play()
+        //player.start()
+       function timeout(){
+           metronome = setTimeout(()=>{
+            $(".circle2").css({"opacity":"0.5"})
+            setTimeout(()=>{
+            $(".circle2").css({"opacity":"1"})
+            },25)
+    
+            //player.start()
+            audio.play()
+            
+            timeout()
+           },60000/time)
+       }
+       timeout()
+    })
+    
+
+
+
+
+    </script>
+</body>
+</html>
